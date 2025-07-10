@@ -1,6 +1,6 @@
-# NYC Administrative Code Parser (`parse_docs.py`)
+# NYC Administrative Code Parser (`parse_code.py`)
 
-This project contains a Python script to parse the New York City Administrative Code from an HTML file (`nyc-tax-code.html`) and convert it into a structured JSON format (`nyc_tax_code.json`).
+This project contains a Python script to parse the New York City Administrative Code from an HTML file (`data/nyc-tax-code.html`) and convert it into a structured JSON format (`data/nyc_tax_code.json`).
 
 ## Setup
 
@@ -21,22 +21,22 @@ This project contains a Python script to parse the New York City Administrative 
 
 ## Usage
 
-To parse the HTML file and generate the JSON output, run the script from the root directory:
+To parse the HTML file and generate the JSON output, run the script from the `scripts` directory:
 
 ```bash
 python3 parse_code.py
 ```
 
-The script will create a `nyc_tax_code.json` file containing the parsed data.
+The script will create a `nyc_tax_code.json` file in the `data` directory.
 
 ## How the Parser Works
 
-The core of this project is the `parse_code.py` script, which uses the `BeautifulSoup` library to interpret the HTML structure of the administrative code.
+The core of this project is the `scripts/parse_code.py` script, which uses the `BeautifulSoup` library to interpret the HTML structure of the administrative code.
 
 ### Overall Structure
 
 The script performs the following steps:
-1.  Reads the `nyc-admin-code.html` file.
+1.  Reads the `data/nyc-tax-code.html` file.
 2.  Uses `BeautifulSoup` to parse the HTML.
 3.  Identifies all major structural `<div>` elements based on their CSS classes (`Title`, `Chapter`, `Section`, `Normal-Level`).
 4.  Iterates through these elements to build a hierarchical Python dictionary.
@@ -68,6 +68,6 @@ The most complex part of the script is handling the hierarchical nesting of sect
     *   **Handles Content Text**: If a line is not a subsection marker, its text content is appended to the `text` field of the most recent subsection (the last item in the `subsection_tracker`). If there are no active subsections, the text is appended to the main section's text.
 ## Downstream Usage
 
-The `nyc_tax_code.json` file produced by this parser serves as the input for the `flatten_json.py` script. That script processes the hierarchical JSON into a flat format suitable for ingestion into a vector database for Retrieval-Augmented Generation (RAG).
+The `data/nyc_tax_code.json` file produced by this parser serves as the input for the `flatten_json.py` script. That script processes the hierarchical JSON into a flat format suitable for ingestion into a vector database for Retrieval-Augmented Generation (RAG).
 
 For more details on the flattening process, please see [`flatten_docs.md`](./flatten_docs.md).

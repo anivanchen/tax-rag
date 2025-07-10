@@ -1,6 +1,6 @@
 # JSON Flattening Script (`flatten_json.py`)
 
-This document provides an overview of the `flatten_json.py` script, which is designed to transform the hierarchical JSON data from `nyc_tax_code.json` into a flat structure suitable for ingestion into a vector database for a Retrieval-Augmented Generation (RAG) system.
+This document provides an overview of the `scripts/flatten_json.py` script, which is designed to transform the hierarchical JSON data from `data/nyc_tax_code.json` into a flat structure suitable for ingestion into a vector database for a Retrieval-Augmented Generation (RAG) system.
 
 ## Purpose
 
@@ -8,17 +8,17 @@ The primary goal of this script is to convert a deeply nested JSON file, represe
 
 ## Usage
 
-The script is intended to be run after `parse_code.py` has generated the `nyc_tax_code.json` file.
+The script is intended to be run from the `scripts` directory after `parse_code.py` has generated the `data/nyc_tax_code.json` file.
 
 ```bash
 python3 flatten_json.py
 ```
 
-This will produce a new, versioned file named `nyc_tax_code_flat_YYYYMMDD.json`, where `YYYYMMDD` is the current date.
+This will produce a new, versioned file named `nyc_tax_code_flat_YYYYMMDD.json` in the `data` directory.
 
 ## How It Works
 
-The script reads the `nyc_tax_code.json` file and traverses its structure to create a flattened list of documents.
+The script reads the `data/nyc_tax_code.json` file and traverses its structure to create a flattened list of documents.
 
 ### 1. Main Function (`flatten_json_granular`)
 

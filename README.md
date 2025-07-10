@@ -10,15 +10,15 @@ This repository contains the initial data processing pipeline for this system.
 
 The initial data processing pipeline is complete. It parses the raw NYC Administrative Code and transforms it into a format suitable for a vector database and a RAG system.
 
-1.  **`parse_code.py`**:
-    *   **Purpose**: Parses the source `nyc-tax-code.html` file.
-    *   **Output**: Creates `nyc_tax_code.json`, a hierarchical JSON representation of the legal code.
-    *   **Documentation**: See [`parse_docs.md`](./parse_docs.md) for details.
+1.  **`scripts/parse_code.py`**:
+    *   **Purpose**: Parses the source `data/nyc-tax-code.html` file.
+    *   **Output**: Creates `data/nyc_tax_code.json`, a hierarchical JSON representation of the legal code.
+    *   **Documentation**: See [`docs/parse_docs.md`](./docs/parse_docs.md) for details.
 
-2.  **`flatten_json.py`**:
-    *   **Purpose**: Ingests the hierarchical `nyc_tax_code.json` and flattens it. Each granular section of the code becomes a separate JSON object, enriched with extensive metadata for versioning, context, and future analysis.
-    *   **Output**: Creates `nyc_tax_code_flat_20250710.json`.
-    *   **Documentation**: See [`flatten_docs.md`](./flatten_docs.md) for details.
+2.  **`scripts/flatten_json.py`**:
+    *   **Purpose**: Ingests the hierarchical `data/nyc_tax_code.json` and flattens it. Each granular section of the code becomes a separate JSON object, enriched with extensive metadata for versioning, context, and future analysis.
+    *   **Output**: Creates `data/nyc_tax_code_flat_YYYYMMDD.json`.
+    *   **Documentation**: See [`docs/flatten_docs.md`](./docs/flatten_docs.md) for details.
 
 The resulting flattened JSON is now ready for the next stage: embedding and ingestion into a vector database.
 
@@ -42,15 +42,15 @@ The resulting flattened JSON is now ready for the next stage: embedding and inge
 4.  **Run the data processing pipeline:**
     ```bash
     # Step 1: Parse the source HTML into hierarchical JSON
-    python3 parse_code.py
+    python3 scripts/parse_code.py
 
     # Step 2: Flatten the JSON and add metadata
-    python3 flatten_json.py
+    python3 scripts/flatten_json.py
     ```
 
 ## Next Steps
 
-Based on the project plan outlined in `PLANS.md`, the next steps involve:
+Based on the project plan outlined in `docs/PLANS.md`, the next steps involve:
 
 1.  **Vector Database Setup**: Setting up an Elasticsearch instance for storing the processed data.
 2.  **Embedding**: Using a sentence-transformer model to create vector embeddings for the `text` field of each JSON object.
