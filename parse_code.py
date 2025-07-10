@@ -23,10 +23,13 @@ def parse_nyc_admin_code_html(file_path):
 
     for tag in all_tags:
         if 'Title' in tag.get('class', []):
+            title_text = tag.get_text(strip=True)
             current_title = {
-                "title_name": tag.get_text(strip=True),
+                "title_name": title_text,
                 "chapters": []
             }
+            title_match = re.search(r'\d+', title_text)
+            current_title_id = title_match.group(0) if title_match else 'T'
             parsed_data["titles"].append(current_title)
             current_chapter = None
             current_section = None
@@ -35,12 +38,16 @@ def parse_nyc_admin_code_html(file_path):
             if current_title is None:
                 # Handle case where a chapter appears before a title
                 current_title = { "title_name": "Unknown Title", "chapters": [] }
+                current_title_id = 'T'
                 parsed_data["titles"].append(current_title)
 
+            chapter_text = tag.get_text(strip=True)
             current_chapter = {
-                "chapter_name": tag.get_text(strip=True),
+                "chapter_name": chapter_text,
                 "sections": []
             }
+            chapter_match = re.search(r'\d+', chapter_text)
+            current_chapter_id = chapter_match.group(0) if chapter_match else 'C'
             current_title["chapters"].append(current_chapter)
             current_section = None
 
@@ -60,7 +67,9 @@ def parse_nyc_admin_code_html(file_path):
             else:
                 section_number, section_name = "Unknown", section_text
 
+            section_id = section_number.strip()
             current_section = {
+                "id": section_id,
                 "section_number": section_number.strip(),
                 "section_name": section_name.strip(),
                 "text": "",
@@ -88,14 +97,21 @@ def parse_nyc_admin_code_html(file_path):
                     code = is_subsection.group(1)
                     sub_text = text_stripped[len(code):].strip()
                     
+                    while subsection_tracker and indentation <= subsection_tracker[-1]['indentation']:
+                        subsection_tracker.pop()
+
+                    # Determine parent ID
+                    parent_id = current_section['id']
+                    if subsection_tracker:
+                        parent_id = subsection_tracker[-1]['subsection']['id']
+
+                    clean_code = re.sub(r'[.()]', '', code)
                     new_subsection = {
+                        "id": f"{parent_id}.{clean_code}",
                         "code": code,
                         "text": sub_text,
                         "subsections": []
                     }
-
-                    while subsection_tracker and indentation <= subsection_tracker[-1]['indentation']:
-                        subsection_tracker.pop()
                     
                     if not subsection_tracker:
                         current_section["subsections"].append(new_subsection)
