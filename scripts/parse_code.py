@@ -134,7 +134,10 @@ def parse_nyc_admin_code_html(file_path):
 
 
 if __name__ == "__main__":
-    parsed_structure = parse_nyc_admin_code_html('nyc-tax-code.html')
-    with open('nyc_tax_code.json', 'w') as f:
+    input_file = '../data/nyc-tax-code.html'
+    output_file = '../data/nyc_tax_code.json'
+
+    parsed_structure = parse_nyc_admin_code_html(input_file)
+    with open(output_file, 'w') as f:
         json.dump(parsed_structure, f, indent=4)
-    print("Parsing complete. The structured data has been saved to nyc_tax_code.json")
+    print(f"Parsing complete. The structured data has been saved to {output_file}")

@@ -105,8 +105,8 @@ if __name__ == "__main__":
     version_date = today.strftime('%Y-%m-%d')
 
     # Define input and output filenames
-    input_filename = 'nyc_tax_code.json'
-    output_filename = f'nyc_tax_code_flat_{version_date.replace('-', '')}.json'
+    input_filename = '../data/nyc_tax_code.json'
+    output_filename = f'../data/nyc_tax_code_flat_{version_date.replace('-', '')}.json'
 
     flatten_json_granular(input_filename, output_filename, version_date)
     print(f"Flattening complete. The data has been saved to {output_filename}")
