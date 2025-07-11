@@ -1,3 +1,5 @@
-/env
+env
 nyc-tax-code-full.html
 *.json
+chroma_db
+__pycache__

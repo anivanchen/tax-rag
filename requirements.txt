@@ -1,3 +1,13 @@
 beautifulsoup4==4.13.4
 soupsieve==2.7
-typing_extensions==4.14.1
+chromadb
+sentence-transformers
+pandas
+numpy
+tqdm
+ipywidgets
+torch
+transformers
+accelerate
+bitsandbytes
+scipy

@@ -80,7 +80,7 @@ def parse_nyc_admin_code_html(file_path):
 
         elif 'Normal-Level' in tag.get('class', []):
             if current_section is not None:
-                text = tag.get_text()
+                text = tag.get_text(' ')
                 
                 indentation = 0
                 for char in text:
