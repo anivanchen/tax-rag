@@ -1,36 +1,54 @@
-# NYC Legislative RAG + LLM System
+# NYC Tax Code RAG Project
 
-## Project Overview
+This project provides a comprehensive toolkit for parsing, processing, and searching the New York City Administrative Code for Taxation and Finance (Title 11). It implements a full Retrieval-Augmented Generation (RAG) pipeline, from initial data parsing to vectorized search, and includes tools for analyzing different data chunking strategies.
 
-This project aims to build a robust Retrieval-Augmented Generation (RAG) system to manage and analyze the constantly evolving NYC Administrative Code, with a primary focus on the NYC Tax Code. While the initial focus is on the NYC code, the system is designed to incorporate other sources, such as New York State laws and other relevant legal and financial documents. The system's core functionality is to ingest new legislative documents, automatically identify their impact on existing law, track all historical versions of legal provisions, and generate structured summaries of changes for economic analysis.
+## Key Features
 
-This repository contains the initial data processing pipeline for this system.
+- **HTML to JSON Parsing**: Converts the complex, nested HTML structure of the tax code into a clean, hierarchical JSON format.
+- **Dual Flattening Approaches**: Implements two distinct methods for preparing data for a vector database:
+    1.  **Granular (Recursive)**: Each section and subsection is treated as an individual document.
+    2.  **Section-Level**: Each top-level section is a single document, with all its subsections concatenated.
+- **Vectorized Database Ingestion**: Ingests the flattened documents into a [ChromaDB](https://www.trychroma.com/) vector store.
+- **Semantic Search**: Provides scripts to perform semantic searches on both the granular and section-level collections.
+- **Performance Analysis**: Includes a sophisticated script to compare the performance, speed, and search quality of the two flattening approaches across various query types.
 
-## Current Progress & Key Scripts
+## Project Structure
 
-The initial data processing pipeline is complete. It parses the raw NYC Administrative Code and transforms it into a format suitable for a vector database and a RAG system.
+```
+nyc-tax/
+├── data/
+│   ├── nyc-tax-code.html         # Raw HTML source
+│   ├── nyc_tax_code.json         # Parsed, structured JSON
+│   ├── nyc_tax_code_flat_*.json  # Granular flattened data
+│   ├── nyc_tax_code_sections_flat_*.json # Section-level flattened data
+│   └── chroma_db/                # ChromaDB vector store
+├── docs/
+│   └── *.md                      # Project documentation and plans
+├── env/
+│   └── ...                       # Python virtual environment
+├── scripts/
+│   ├── parse_code.py             # Parses HTML to structured JSON
+│   ├── flatten_json.py           # Flattens JSON recursively (granular)
+│   ├── flatten_json_sections.py  # Flattens JSON by section
+│   ├── ingest_data.py            # Ingests granular data into ChromaDB
+│   ├── ingest_data_sections.py   # Ingests section-level data into ChromaDB
+│   ├── search_data.py            # Searches the granular collection
+│   ├── search_data_sections.py   # Searches the section-level collection
+│   └── performance_analysis.py   # Compares performance of both approaches
+└── README.md
+```
 
-1.  **`scripts/parse_code.py`**:
-    *   **Purpose**: Parses the source `data/nyc-tax-code.html` file.
-    *   **Output**: Creates `data/nyc_tax_code.json`, a hierarchical JSON representation of the legal code.
-    *   **Documentation**: See [`docs/parse_docs.md`](./docs/parse_docs.md) for details.
+## Setup and Installation
 
-2.  **`scripts/flatten_json.py`**:
-    *   **Purpose**: Ingests the hierarchical `data/nyc_tax_code.json` and flattens it. Each granular section of the code becomes a separate JSON object, enriched with extensive metadata for versioning, context, and future analysis.
-    *   **Output**: Creates `data/nyc_tax_code_flat_YYYYMMDD.json`.
-    *   **Documentation**: See [`docs/flatten_docs.md`](./docs/flatten_docs.md) for details.
-
-The resulting flattened JSON is now ready for the next stage: embedding and ingestion into a vector database.
-
-## Setup and Usage
-
-1.  **Create a virtual environment:**
+1.  **Clone the repository:**
     ```bash
-    python3 -m venv env
+    git clone <repository-url>
+    cd nyc-tax
     ```
 
-2.  **Activate the virtual environment:**
+2.  **Create and activate a virtual environment:**
     ```bash
+    python3 -m venv env
     source env/bin/activate
     ```
 
@@ -39,20 +57,112 @@ The resulting flattened JSON is now ready for the next stage: embedding and inge
     pip install -r requirements.txt
     ```
 
-4.  **Run the data processing pipeline:**
-    ```bash
-    # Step 1: Parse the source HTML into hierarchical JSON
-    python3 scripts/parse_code.py
+## Workflow and Usage
 
-    # Step 2: Flatten the JSON and add metadata
-    python3 scripts/flatten_json.py
-    ```
+Follow these steps to set up the database and run searches. The scripts should be run from within the `scripts/` directory.
 
-## Next Steps
+```bash
+cd scripts/
+```
 
-Based on the project plan outlined in `docs/PLANS.md`, the next steps involve:
+### Step 1: Parse the Raw HTML
 
-1.  **Vector Database Setup**: Setting up an Elasticsearch instance for storing the processed data.
-2.  **Embedding**: Using a sentence-transformer model to create vector embeddings for the `text` field of each JSON object.
-3.  **Ingestion**: Writing a script to load the flattened, enriched, and embedded data into the vector database.
-4.  **RAG Pipeline Development**: Building the core RAG application using a framework like LangChain to orchestrate retrieval, context assembly, and generation with an LLM.
+First, parse the source HTML file (`data/nyc-tax-code.html`) into a structured JSON file.
+
+```bash
+python parse_code.py
+```
+- **Input**: `data/nyc-tax-code.html`
+- **Output**: `data/nyc_tax_code.json`
+
+### Step 2: Flatten the JSON Data
+
+Next, create the flattened document files for ingestion. You can generate one or both versions.
+
+**Option A: Granular (Recursive) Flattening**
+```bash
+python flatten_json.py
+```
+- **Input**: `data/nyc_tax_code.json`
+- **Output**: `data/nyc_tax_code_flat_YYYYMMDD.json`
+
+**Option B: Section-Level Flattening**
+```bash
+python flatten_json_sections.py
+```
+- **Input**: `data/nyc_tax_code.json`
+- **Output**: `data/nyc_tax_code_sections_flat_YYYYMMDD.json`
+
+### Step 3: Ingest Data into ChromaDB
+
+Ingest the flattened files into their respective ChromaDB collections.
+
+**Option A: Ingest Granular Data**
+```bash
+python ingest_data.py
+```
+- **Collection Name**: `nyc_tax_code`
+- **Documents**: ~8,000
+
+**Option B: Ingest Section-Level Data**
+```bash
+python ingest_data_sections.py
+```
+- **Collection Name**: `nyc_tax_code_sections`
+- **Documents**: ~800
+
+### Step 4: Search the Database
+
+Query the collections using the search scripts.
+
+**Option A: Search Granular Collection**
+```bash
+python search_data.py "your search query here"
+```
+
+**Option B: Search Section-Level Collection**
+```bash
+python search_data_sections.py "your search query here"
+```
+You can also specify the number of results to return with the `-n` flag:
+```bash
+python search_data.py "real estate transfer tax" -n 10
+```
+
+### Step 5: Manual Search and Evaluation
+
+With the data ingested, you can now manually test and evaluate the search quality of each approach. This is crucial for understanding the trade-offs between semantic relevance and chunking strategy.
+
+**Search Granular Collection:**
+```bash
+python search_data.py "your search query"
+```
+
+**Search Section-Level Collection:**
+```bash
+python search_data_sections.py "your search query"
+```
+
+Focus on how the results differ for various types of queries (broad, specific, technical) to determine which chunking strategy best suits your needs.
+
+## Future Directions and Roadmap
+
+This project is an ongoing effort to build a robust and intelligent RAG system for legal documents. The current foundation enables several exciting future developments:
+
+### 1. Advanced Chunking and Enrichment
+- **Explore New Chunking Techniques**: Move beyond granular and section-level strategies to explore more advanced methods like semantic chunking or proposition-based chunking.
+- **AI-Generated Keywords**: Implement a lightweight AI/summarization model to automatically generate relevant keywords for each data entry, enhancing metadata and filterability.
+- **Metadata Refinement**: Re-evaluate the metadata structure, potentially removing the summary section in favor of more dynamic, AI-generated fields.
+
+### 2. Expanding the Knowledge Base
+- **Incorporate NYS Tax Code**: Expand the data sources to include New York State tax law, creating a more comprehensive legal database.
+- **Dynamic Legislative Updates**: Develop a robust system for managing the lifecycle of legal documents:
+    - **Add**: Seamlessly integrate new legislation.
+    - **Deprecate**: Mark outdated laws as no longer in effect while retaining them for historical context.
+    - **Delete**: Remove irrelevant or superseded entries.
+- **Automated Re-ingestion**: Create a process to periodically re-ingest the entire tax code to ensure the database remains current and fresh.
+
+### 3. Building a Full RAG Pipeline
+- **Embedding Model Evaluation**: Benchmark and evaluate different text embedding models to find the optimal balance of performance, cost, and semantic understanding.
+- **Intelligent Query Parsing**: Develop a component that can parse natural language user questions into structured search queries, complete with metadata filters, to improve search accuracy.
+- **End-to-End Implementation**: Build out the complete RAG pipeline, connecting the user interface, query parser, retriever (ChromaDB), and a language model for generating answers.
