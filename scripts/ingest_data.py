@@ -31,7 +31,7 @@ client = chromadb.PersistentClient(path=os.path.join(data_dir, "chroma_db"))
 
 
 # Create or get the collection
-collection_name = "nyc_tax_code"
+collection_name = "nyc_tax_code_keyworded"
 print(f"Getting or creating ChromaDB collection: '{collection_name}'...")
 collection = client.get_or_create_collection(
     name=collection_name,

@@ -1,5 +1,9 @@
 import json
 import datetime
+from keybert import KeyBERT
+
+# Initialize KeyBERT model
+kw_model = KeyBERT()
 
 def flatten_recursively(node, documents, base_metadata, breadcrumb=""):
     """
@@ -7,6 +11,7 @@ def flatten_recursively(node, documents, base_metadata, breadcrumb=""):
     """
     # Create a document for the current node
     original_id = node['id']
+    print(f"Processing node: {original_id}")
     version_date = base_metadata['version_date']
     legislation_type = base_metadata['legislation_type']
     
@@ -24,8 +29,22 @@ def flatten_recursively(node, documents, base_metadata, breadcrumb=""):
 
     text_content = node.get('text', '').strip()
 
+    # Generate keywords if text_content is not empty
+    keywords = []
+    if text_content:
+        try:
+            # Extract keywords. `keyphrase_ngram_range` specifies that we want single words.
+            # `stop_words='english'` helps remove common, non-informative words.
+            keywords_tuples = kw_model.extract_keywords(text_content, 
+                                                        keyphrase_ngram_range=(1, 1), 
+                                                        stop_words='english')
+            # The result is a list of tuples (keyword, score). We only need the keyword.
+            keywords = [kw[0] for kw in keywords_tuples]
+        except Exception as e:
+            print(f"Could not generate keywords for node {original_id}. Error: {e}")
+
     metadata['chunk_size'] = len(text_content)
-    metadata['keywords'] = []
+    metadata['keywords'] = keywords
     metadata['summary'] = ""
     metadata['status'] = "Active"
     metadata['supersedes_uid'] = ""
@@ -51,6 +70,7 @@ def flatten_json_granular(input_filename, output_filename, version_date):
     Reads a hierarchical JSON file, flattens it into granular documents, 
     and writes the result to a new file.
     """
+    print(f"Starting to flatten {input_filename}...")
     with open(input_filename, 'r', encoding='utf-8') as f:
         data = json.load(f)
 
@@ -95,6 +115,7 @@ def flatten_json_granular(input_filename, output_filename, version_date):
                 flatten_recursively(section, flat_documents, base_metadata, breadcrumb=initial_breadcrumb)
 
     # Write the flattened data to the output file
+    print(f"Writing {len(flat_documents)} documents to {output_filename}...")
     with open(output_filename, 'w', encoding='utf-8') as f:
         json.dump(flat_documents, f, indent=4)
 
@@ -106,7 +127,7 @@ if __name__ == "__main__":
 
     # Define input and output filenames
     input_filename = '../data/nyc_tax_code.json'
-    output_filename = f'../data/nyc_tax_code_flat_{version_date.replace('-', '')}.json'
+    output_filename = f'../data/nyc_tax_code_flat_{version_date.replace("-", "")}.json'
 
     flatten_json_granular(input_filename, output_filename, version_date)
     print(f"Flattening complete. The data has been saved to {output_filename}")
